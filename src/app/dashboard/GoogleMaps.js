@@ -1,6 +1,6 @@
 'use client';
 
-import { useDriversContext  } from "@/lib/context/DriversContext";
+import { useDriversContext } from "@/lib/context/DriversContext";
 import theme from "@/theme";
 import { CarCrash, Close, DirectionsCar } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, IconButton, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material";
@@ -42,7 +42,7 @@ export default function GoogleMaps() {
                 yesIWantToUseGoogleMapApiInternals
             >
 
-                {drivers && drivers.map((driver, index) => <CarMarker key={index} driver={driver} lat={driver.lat} lng={driver.long} />)}
+                {drivers && drivers.map((driver, index) => <CarMarker key={index} driver={driver} lat={driver.lat} lng={driver.lng} />)}
 
             </GoogleMap>
             {highlitedDriver &&

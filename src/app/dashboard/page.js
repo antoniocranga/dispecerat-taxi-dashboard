@@ -3,12 +3,17 @@
 import theme from "@/theme";
 import { AppBar, Box, Button, Card, CardContent, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Toolbar, Typography } from "@mui/material";
 import GoogleMaps from "./GoogleMaps";
-import { Delete, Phone, PinDrop, Search } from "@mui/icons-material";
+import { Delete, Logout, Phone, PinDrop, Search } from "@mui/icons-material";
 import { NextResponse } from "next/server";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingButton from '@mui/lab/LoadingButton';
+import { useAuthentication } from "@/lib/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase/firebase";
 
 export default function Dashboard() {
+    const router = useRouter();
     const [phone, setPhone] = useState("");
     const [details, setDetails] = useState("");
 
@@ -18,6 +23,14 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(false);
 
     const url = "https://places.googleapis.com/v1/places:autocomplete";
+
+    const { user } = useAuthentication();
+
+    useEffect(() => {
+        if (!user) {
+            router.push('/auth');
+        }
+    }, [user]);
 
     async function makeRequest(text) {
         if (text && text.length > 0) {
@@ -29,15 +42,15 @@ export default function Dashboard() {
                 },
                 body: JSON.stringify({
                     input: text,
-                    locationRestriction: {
-                        circle: {
-                            center: {
-                                latitude: 45.177656,
-                                longitude: 28.799860
-                            },
-                            radius: 5000.0
-                        }
-                    },
+                    // locationRestriction: {
+                    //     circle: {
+                    //         center: {
+                    //             latitude: 45.177656,
+                    //             longitude: 28.799860
+                    //         },
+                    //         radius: 5000.0
+                    //     }
+                    // },
                     includedRegionCodes: ["ro"],
                     languageCode: "ro"
                 })
@@ -88,8 +101,13 @@ export default function Dashboard() {
 
     return (<Box>
         <AppBar position="static">
-            <Toolbar>
+            <Toolbar sx={{
+                display: "flex",
+                justifyContent: "space-between"
+            }}>
                 <Typography variant="h6">Dispecerat Taxi</Typography>
+                <IconButton onClick={() => { signOut(auth); }}
+                ><Logout /></IconButton>
             </Toolbar>
         </AppBar>
         <Grid container sx={{
@@ -113,7 +131,7 @@ export default function Dashboard() {
                             endAdornment: <InputAdornment position="end"><Search /> </InputAdornment>
                         }} onChange={(e) => {
                             makeRequest(e.target.value);
-                        }} disabled={loading}/>
+                        }} disabled={loading} />
                         {suggestions && suggestions.length > 0 &&
                             <List>
                                 {
@@ -155,7 +173,7 @@ export default function Dashboard() {
                         }} onChange={(e) => { setPhone(e.target.value); }} value={phone} disabled={loading}>
 
                         </TextField>
-                        <TextField fullWidth multiline size="small" placeholder="Alte detalii" minRows={3}></TextField>
+                        <TextField fullWidth multiline size="small" placeholder="Alte detalii" minRows={3} onChange={(e) => { setDetails(e.target.value); }} value={details} disabled={loading}></TextField>
                         <LoadingButton variant="contained" loading={loading} onClick={handleOrder}>Plaseaza comanda</LoadingButton>
                         <Button variant="outlined" onClick={resetAction} disabled={loading}>Reseteaza</Button>
                     </CardContent>
@@ -167,3 +185,5 @@ export default function Dashboard() {
         </Grid>
     </Box>);
 }
+
+// export default withAuth(Dashboard);

@@ -1,4 +1,4 @@
-import { doc, updateDoc } from "@firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "@firebase/firestore";
 import { firestoreDb, realtimeDb } from "./firebase";
 import { ref, update } from "firebase/database";
 
@@ -24,4 +24,8 @@ async function updateDriver(driver) {
     })
 }
 
-export {updateOrder, updateDriver}
+async function addOrder(order) {
+    await addDoc(collection(firestoreDb, "orders"), order);
+}
+
+export {updateOrder, updateDriver, addOrder}

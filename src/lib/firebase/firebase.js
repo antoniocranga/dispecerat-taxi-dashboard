@@ -2,6 +2,7 @@
 import { getFirestore } from "@firebase/firestore";
 import { initializeApp } from "firebase/app";
 import {getDatabase, ref} from "firebase/database";
+import { getAuth, browserLocalPersistence, setPersistence } from "firebase/auth";
 // import { getAnalytics } from "firebase/analytics";
 // import app from 'firebase/app';
 // TODO: Add SDKs for Firebase products that you want to use
@@ -17,23 +18,15 @@ const firebaseConfig = {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID,
-    databaseURL: process.env.NEXT_PUBLIC_DATABASE_URL
-};
+    databaseURL: process.env.NEXT_PUBLIC_DATABASE_URL};
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const realtimeDb = getDatabase(app);
 const firestoreDb = getFirestore(app);
-// if (typeof window !== 'undefined') {
-//     const analytics = getAnalytics(app);
-// }
+const auth = getAuth(app);
 
-// class Firebase {
-//     constructor() {
-//         app.initializeApp(firebaseConfig);
-//         this.realtimeDb = app.database();
-//     }
+setPersistence(auth, browserLocalPersistence);
 
-//     users = () => this.realtimeDb.ref('users');
-// }
-export {realtimeDb, firestoreDb}
+export {realtimeDb, firestoreDb, auth}

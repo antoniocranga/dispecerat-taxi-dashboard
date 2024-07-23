@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { realtimeDb } from '../firebase/firebase';
+import { realtimeDb, firestoreDb } from '../firebase/firebase';
 import { onValue, ref } from "firebase/database";
+import { doc, getDoc } from "@firebase/firestore";
 
 
 export const DriversContext = createContext();
@@ -15,26 +16,51 @@ export const DriversProvider = ({ children }) => {
         const driversRef = ref(realtimeDb, 'drivers');
         onValue(driversRef, (snapshot) => {
             const data = snapshot.val();
-            
-            var drivers = {};
-            if(data){
-                drivers = Object.keys(data).map((key, index) => {
-                    const driver = data[key];
-                    console.log(driver);
-                    return {
-                        ...driver,
-                        id: key
-                    }
-                });
+
+            if (!data) {
+                setDrivers([]);
+                return;
             }
 
-            console.log(drivers);
-            setDrivers(drivers);
-        })
-    }
-    
-    useEffect(() => {
+            const drivers = data ? Object.entries(data).map(([key, driver]) => ({
+                ...driver,
+                id: key
+            })).filter((e) => e.online == true) : [];
 
+            const promises = drivers.map(async (driver) => {
+
+                const driverDetails = await fetchDriverDetails(driver.id);
+                return {
+                    ...driverDetails,
+                    ...driver
+                }
+            });
+
+            Promise.all(promises).then((updatedDrivers) => {
+                setDrivers(updatedDrivers);
+            }).catch((error) => {
+                console.log('Error fetching driver details:', error);
+            });
+        }, (error) => {
+            console.log(error);
+        });
+    }
+
+    async function fetchDriverDetails(driverId) {
+        try {
+            const driverDocRef = doc(firestoreDb, 'drivers', driverId);
+            const docSnap = await getDoc(driverDocRef);
+            if (docSnap.exists()) {
+                return docSnap.data();
+            } else {
+                return null;
+            }
+        } catch (error) {
+            return null;
+        }
+    }
+
+    useEffect(() => {
         getDrivers()
     }, []);
 
@@ -42,7 +68,8 @@ export const DriversProvider = ({ children }) => {
         <DriversContext.Provider value={{
             drivers: drivers,
             highlitedDriver,
-            setHighlitedDriver
+            setHighlitedDriver,
+            fetchDriverDetails
         }}>
             {children}
         </DriversContext.Provider>
