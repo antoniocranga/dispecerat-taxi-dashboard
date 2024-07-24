@@ -1,10 +1,11 @@
-import * as React from 'react';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { DriversProvider } from '@/lib/context/DriversContext';
-import { AuthProvider } from '@/lib/context/AuthContext';
-import theme from '@/theme';
+import * as React from "react";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { DriversProvider } from "@/lib/context/DriversContext";
+import { AuthProvider } from "@/lib/context/AuthContext";
+import theme from "@/theme";
+import FullScreenCircularProgress from "@/lib/components/FullScreenCircularProgress";
 
 export default function RootLayout(props) {
   return (
@@ -16,7 +17,9 @@ export default function RootLayout(props) {
             <CssBaseline />
             <AuthProvider>
               <DriversProvider>
-                {props.children}
+                <FullScreenCircularProgress>
+                  {props.children}
+                </FullScreenCircularProgress>
               </DriversProvider>
             </AuthProvider>
           </ThemeProvider>
