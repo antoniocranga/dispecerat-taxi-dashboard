@@ -1,45 +1,79 @@
-// "use client";
+"use client";
 
-// import { createContext, useContext, useEffect, useState } from "react";
-// import { realtimeDb } from '../firebase/firebase';
-// import { onValue, ref } from "firebase/database";
+import { createContext, useContext, useEffect, useState } from "react";
+import { realtimeDb, firestoreDb } from "../firebase/firebase";
+import { onValue, ref } from "firebase/database";
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "@firebase/firestore";
+import { useAuthentication } from "./AuthContext";
 
-// export const OrdersContext = createContext();
+export const OrdersContext = createContext();
 
-// export const OrdersProvider = ({ children }) => {
-//     const [orders, setOrders] = useState(null);
-//     const [selectedOrder, setSelectedOrder] = useState(null);
+export const OrdersProvider = ({ children }) => {
+  const { loading, user } = useAuthentication();
+  const [pendingOrders, setPendingOrders] = useState(null);
+  const [noDriverOrders, setNoDriverOrders] = useState(null);
 
-//     function getDrivers() {
-//         const driversRef = ref(realtimeDb, 'drivers');
-//         onValue(driversRef, (snapshot) => {
-//             const data = snapshot.val();
+  function listenToOrders() {
+    const ordersRef = collection(firestoreDb, "orders");
+    const pendingQuery = query(ordersRef, where("status", "==", "pending"));
+    onSnapshot(pendingQuery, (snapshot) => {
+      const orders = [];
+      snapshot.docs.forEach((doc) => {
+        orders.push({ id: doc.id, ...doc.data() });
+      });
 
-//             const drivers = data ? Object.entries(data).map(([key, driver]) => ({
-//                 ...driver,
-//                 id: key
-//             })) : [];
+      setPendingOrders(orders);
+    });
 
-//             setOrders(drivers);
-//         });
-//     }
+    const noDriverQuery = query(
+      ordersRef,
+      where("status", "==", "no_driver_found")
+    );
+    onSnapshot(noDriverQuery, (snapshot) => {
+      const orders = [];
+      snapshot.docs.forEach((doc) => {
+        orders.push({ id: doc.id, ...doc.data() });
+      });
 
-//     useEffect(() => {
+      setNoDriverOrders(orders);
+    });
+  }
 
-//         getDrivers()
-//     }, []);
+  useEffect(() => {
+    if (!loading && user) {
+      listenToOrders();
+    }
+  }, [loading, user]);
 
-//     return (
-//         <OrdersContext.Provider value={{
-//             orders,
-//             selectedOrder,
-//             setSelectedOrder
-//         }}>
-//             {children}
-//         </OrdersContext.Provider>
-//     )
-// }
+  function manualRetryOrder(id) {
+    updateDoc(doc(firestoreDb, "orders", id), {
+      retries: 0,
+      status: "pending",
+      blacklist: [],
+    });
+  }
 
-// export function useOrdersContext() {
-//     return useContext(OrdersContext);
-// }
+  return (
+    <OrdersContext.Provider
+      value={{
+        pendingOrders: pendingOrders,
+        noDriverOrders: noDriverOrders,
+        manualRetryOrder
+      }}
+    >
+      {children}
+    </OrdersContext.Provider>
+  );
+};
+
+export function useOrdersContext() {
+  return useContext(OrdersContext);
+}

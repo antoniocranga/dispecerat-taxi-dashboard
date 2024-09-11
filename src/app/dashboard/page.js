@@ -29,6 +29,7 @@ import { useAuthentication } from "@/lib/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase";
+import OrderInfoWidget from "./OrdersInfoWidget";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -180,7 +181,7 @@ export default function Dashboard() {
                 fullWidth
                 size="small"
                 placeholder="Cauta adresa"
-                value={state.address}
+                // value={state.address}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -190,7 +191,7 @@ export default function Dashboard() {
                 }}
                 onChange={(e) => {
                   makeRequest(e.target.value);
-                  setState({ ...state, address: e.target.value });
+                  // setState({ ...state, address: e.target.value });
                 }}
                 disabled={state.loading}
               />
@@ -306,8 +307,23 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={6} md={8} lg={9} sx={{ background: "black" }}>
+        <Grid
+          item
+          xs={6}
+          md={8}
+          lg={9}
+          sx={{ background: "black", position: "relative", height: "100%" }}
+        >
           <GoogleMaps />
+          <Box
+            sx={{
+              position: "absolute",
+              top: "0",
+              right: "0",
+            }}
+          >
+            <OrderInfoWidget />
+          </Box>
         </Grid>
       </Grid>
       <Snackbar open={state.sent} autoHideDuration={5000} onClose={handleClose}>

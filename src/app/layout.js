@@ -6,6 +6,7 @@ import { DriversProvider } from "@/lib/context/DriversContext";
 import { AuthProvider } from "@/lib/context/AuthContext";
 import theme from "@/theme";
 import FullScreenCircularProgress from "@/lib/components/FullScreenCircularProgress";
+import { OrdersProvider } from "@/lib/context/OrdersContext";
 
 export default function RootLayout(props) {
   return (
@@ -17,9 +18,11 @@ export default function RootLayout(props) {
             <CssBaseline />
             <AuthProvider>
               <DriversProvider>
-                <FullScreenCircularProgress>
-                  {props.children}
-                </FullScreenCircularProgress>
+                <OrdersProvider>
+                  <FullScreenCircularProgress>
+                    {props.children}
+                  </FullScreenCircularProgress>
+                </OrdersProvider>
               </DriversProvider>
             </AuthProvider>
           </ThemeProvider>
