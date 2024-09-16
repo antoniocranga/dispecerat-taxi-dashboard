@@ -67,15 +67,15 @@ export default function Dashboard() {
         },
         body: JSON.stringify({
           input: text,
-          // locationRestriction: {
-          //     circle: {
-          //         center: {
-          //             latitude: 45.177656,
-          //             longitude: 28.799860
-          //         },
-          //         radius: 5000.0
-          //     }
-          // },
+          locationRestriction: {
+              circle: {
+                  center: {
+                      latitude: 45.177656,
+                      longitude: 28.799860
+                  },
+                  radius: 5000.0
+              }
+          },
           includedRegionCodes: ["ro"],
           languageCode: "ro",
         }),
